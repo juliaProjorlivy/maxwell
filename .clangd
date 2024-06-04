@@ -1,0 +1,5 @@
+CompileFlags:
+  Add: [-I/home/julia/projects/maxwell/include, -I/home/julia/libs/includeVerror, 
+  -I/home/julia/libs/includeRay]
+
+
