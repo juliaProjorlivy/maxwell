@@ -12,7 +12,7 @@ CXX_FLAGS = -I include -I /home/julia/libs/includeVerror -I /home/julia/libs/inc
  -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
 SRCS = src/main.cpp
-OBJ = $(patsubst %.cpp, build/%.o, $(subst src/, , $(SRCS))) lib/Verror/lib/libVerror.a
+OBJ = $(patsubst %.cpp, build/%.o, $(subst src/, , $(SRCS))) 
 EXECUTABLE = maxwell
 VALGRIND = valgrind --leak-check=full --leak-resolution=med ./$(EXECUTABLE)
 

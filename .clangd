@@ -1,5 +1,11 @@
 CompileFlags:
   Add: [-I/home/julia/projects/maxwell/include, -I/home/julia/libs/includeVerror, 
   -I/home/julia/libs/includeRay]
-
+InlayHints:
+  BlockEnd: No
+  Designators: Yes
+  Enabled: No
+  ParameterNames: No
+  DeducedTypes: Yes
+  TypeNameLimit: 24
 
