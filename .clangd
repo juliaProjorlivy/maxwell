@@ -1,6 +1,6 @@
 CompileFlags:
   Add: [-I/home/julia/projects/maxwell/include, -I/home/julia/libs/includeVerror, 
-  -I/home/julia/libs/includeRay]
+  -I/home/julia/libs/includeRay, -I/usr/include/mgl2]
 InlayHints:
   BlockEnd: No
   Designators: Yes
