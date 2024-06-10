@@ -23,7 +23,7 @@ particle *CreateParticle(Vector2 Pos)
 }
 
 // Create an array of evenly spreaded particles
-particle **CreateParticles(int NParticles, Vector2 WindowSize)
+particle **CreateParticles(int NParticles, Vector2 BoxSize)
 {
     particle **Particles = (particle **)calloc(sizeof(particle *), NParticles);
     if(!Particles)
@@ -32,8 +32,8 @@ particle **CreateParticles(int NParticles, Vector2 WindowSize)
         return NULL;
     }
 
-    int Nw = (int)(WindowSize.x / (2 * r0));
-    int Nh = (int)(WindowSize.y / (2 * r0));
+    int Nw = (int)(BoxSize.x / (2 * r0));
+    int Nh = (int)(BoxSize.y / (2 * r0));
 
     int Ncolumns = 1, Nstrings = 1;
     float ax = 1, ay = 1;
@@ -43,24 +43,24 @@ particle **CreateParticles(int NParticles, Vector2 WindowSize)
         Ncolumns = NParticles;
         Nstrings = 1;
 
-        ax = WindowSize.x / (2. * NParticles);
-        ay = WindowSize.y / 2.;
+        ax = BoxSize.x / (2. * NParticles);
+        ay = BoxSize.y / 2.;
     }
     else if(Nh >= NParticles)
     {
         Ncolumns = 1;
         Nstrings = NParticles;
 
-        ax = WindowSize.x / 2.;
-        ay = WindowSize.y / (2. * NParticles);
+        ax = BoxSize.x / 2.;
+        ay = BoxSize.y / (2. * NParticles);
     }
     else
     {
         Ncolumns = Nw;
         Nstrings = Nh;
 
-        ax = WindowSize.x / (2. * Nw);
-        ay = WindowSize.y / (2. * Nh);
+        ax = BoxSize.x / (2. * Nw);
+        ay = BoxSize.y / (2. * Nh);
     }
 
     for(int i = 0; i < Nstrings; i++)
@@ -132,7 +132,7 @@ void AllParticlesCollision(particle **Particles, int NParticles)
 }
 
 // change velocity when wall wall collision happens
-void WallCollision(particle *Particle)
+void WallCollision(particle *Particle, Vector2 BoxSize)
 {
     // left wall
     if(Particle->pos.x < (r0 + epsilon)) 
@@ -141,9 +141,9 @@ void WallCollision(particle *Particle)
         Particle->v.x *= -1.; 
     } 
     // right wall
-    else if(Particle->pos.x > (WindowWidth - r0 - epsilon))
+    else if(Particle->pos.x > (BoxSize.x - r0 - epsilon))
     { 
-        Particle->pos.x = WindowWidth - r0; 
+        Particle->pos.x = BoxSize.x - r0; 
         Particle->v.x *= -1.; 
     } 
     // upper wall
@@ -153,9 +153,9 @@ void WallCollision(particle *Particle)
         Particle->v.y *= -1.; 
     }
     // lower wall
-    else if(Particle->pos.y > (WindowHeight - r0 - epsilon)) 
+    else if(Particle->pos.y > (BoxSize.y - r0 - epsilon)) 
     { 
-        Particle->pos.y = WindowHeight - r0; 
+        Particle->pos.y = BoxSize.y - r0; 
         Particle->v.y *= -1.; 
     } 
 }
@@ -167,19 +167,19 @@ void ChangePosition(particle *Particle, float frametime)
 }
 
 // draw particles considering collisions
-void DrawParticles(particle **Particles, int NParticles)
+void DrawParticles(particle **Particles, int NParticles, Vector2 BoxSize)
 {
     for(int i = 0; i < NParticles; i++)
     {
         particle *Particle = Particles[i];
-        DrawCircle((int)(Particle->pos.x), (int)(Particle->pos.y), r0, BLUE);
-        AllParticlesCollision(Particles, NParticles);
-        // for(int j = i + 1; j < NParticles; j++)
-        // {
-        //     ParticleCollision(Particles[i], Particles[j]);
-        // }
+        // AllParticlesCollision(Particles, NParticles);
+        for(int j = i + 1; j < NParticles; j++)
+        {
+            ParticleCollision(Particles[i], Particles[j]);
+        }
         ChangePosition(Particle, GetFrameTime());
-        WallCollision(Particle);
+        WallCollision(Particle, BoxSize);
+        DrawCircle((int)(Particle->pos.x), (int)(Particle->pos.y), r0, BLUE);
     }
 }
 

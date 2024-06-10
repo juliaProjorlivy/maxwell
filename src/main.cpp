@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-#include <float.h>
 
 #include "raylib.h"
 #include "raymath.h"
@@ -33,16 +32,16 @@ void PrintInfo(particle **Particles, int NParticles)
 
 int main()
 {
-    InitWindow(WindowWidth, WindowHeight, "Maxwell");
+    InitWindow(BoxWidth + PlotWidth, BoxHeight, "Maxwell");
 
-    if((int)(WindowHeight / (2 * r0)) * (int)(WindowWidth / (2 * r0)) < N0)
+    if((int)(BoxHeight / (2 * r0)) * (int)(BoxWidth / (2 * r0)) < N0)
     {
         VERROR("Size error too many particles");
         return 1;
     }
-    Vector2 WindowSize = {.x = WindowWidth, .y = WindowHeight};
+    Vector2 BoxSize = {.x = BoxWidth, .y = BoxHeight};
 
-    particle **Particles = CreateParticles(N0, WindowSize);
+    particle **Particles = CreateParticles(N0, BoxSize);
     if(!Particles)
     {
         VERROR_MEM;
@@ -61,18 +60,18 @@ int main()
         if(!flag)
         {
         ClearBackground(WHITE);
-        DrawParticles(Particles, N0);
+        DrawLineV({BoxSize.x, 0}, {BoxSize.x, BoxSize.y}, BLACK);
+        DrawParticles(Particles, N0, BoxSize);
         // Plot(Particles, N0);
         // PrintInfo(Particles, N0);       // DEBUGINFO DELETE!!!   
         // DrawVelocity(Particles, N0);    // DEBUGINFO DELETE!!!
         }
 
-        Plot(Particles, N0);
+        Plot(Particles, N0, BoxSize);
         EndDrawing();
         // flag = 1;
     }
 
     DeleteParticles(Particles, N0);
-    printf("MAX FLOAT = %f\n", FLT_MAX);
     return 0;
 }
