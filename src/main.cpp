@@ -21,7 +21,6 @@ void DrawVelocity(particle **Particles, int NParticles)
 
 void PrintInfo(particle **Particles, int NParticles)
 {
-    SortParticles(Particles, NParticles);
     for(int i = 0; i < NParticles; i++)
     {
         printf("%d. VELOCITY: %f | x = %f\n", i, sqrt(Vector2DotProduct(Particles[i]->v, Particles[i]->v)), Particles[i]->pos.x);
@@ -32,7 +31,7 @@ void PrintInfo(particle **Particles, int NParticles)
 
 int main()
 {
-    InitWindow(BoxWidth + PlotWidth, BoxHeight, "Maxwell");
+    InitWindow(BoxWidth + PlotWidth, BoxHeight + plotHeight, "Maxwell");
 
     if((int)(BoxHeight / (2 * r0)) * (int)(BoxWidth / (2 * r0)) < N0)
     {
@@ -48,6 +47,8 @@ int main()
         return 1;
     }
 
+    int Partition = Partitions;
+    float zoomCoef = 1.;
     int flag = 1;
     while(!WindowShouldClose())
     {
@@ -60,14 +61,15 @@ int main()
         if(!flag)
         {
         ClearBackground(WHITE);
-        DrawLineV({BoxSize.x, 0}, {BoxSize.x, BoxSize.y}, BLACK);
+        DrawLineBezier({BoxSize.x, 0}, {BoxSize.x, BoxSize.y}, 1, BLACK);
+        DrawLineBezier({0, BoxSize.y}, {BoxSize.x, BoxSize.y}, 1, BLACK);
         DrawParticles(Particles, N0, BoxSize);
         // Plot(Particles, N0);
         // PrintInfo(Particles, N0);       // DEBUGINFO DELETE!!!   
         // DrawVelocity(Particles, N0);    // DEBUGINFO DELETE!!!
         }
 
-        Plot(Particles, N0, BoxSize);
+        Plot(Particles, N0, BoxSize, &zoomCoef, &Partition);
         EndDrawing();
         // flag = 1;
     }

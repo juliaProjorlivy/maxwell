@@ -18,8 +18,7 @@ VALGRIND = valgrind --leak-check=full --leak-resolution=med ./$(EXECUTABLE)
 
 all: $(OBJ)
 	@echo "CXX $(EXECUTABLE)"
-	@$(CXX) $(CXX_FLAGS) -lasan $(OBJ) -o $(EXECUTABLE) -L/home/julia/libs -lraylib -lVerror -L/usr/lib/libmgl -lmgl
-	
+	@$(CXX) $(CXX_FLAGS) -lasan $(OBJ) -o $(EXECUTABLE) -L/home/julia/libs -lraylib -lVerror -L/usr/lib/ -lmgl -lmgl-qt5
 build/%.o: src/%.cpp
 	mkdir -p ./build
 	@$(CXX) $(CXX_FLAGS) -c -o $@ $<

@@ -82,8 +82,17 @@ particle **CreateParticles(int NParticles, Vector2 BoxSize)
 }
 
 // change of velocity and coordinates when two particles collide
-void ParticleCollision(particle *Particle1, particle *Particle2)
+void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 {
+    if(Particle1->pos.x + r0 < Particle2->pos.x - r0 - epsilon || Particle1->pos.x - r0 > Particle2->pos.x + r0 + epsilon)
+    {
+        return;
+    }
+    if(Particle1->pos.y + r0 < Particle2->pos.y - r0 - epsilon || Particle1->pos.y - r0 > Particle2->pos.y + r0 + epsilon)
+    {
+        return ;
+    }
+
     Vector2 delta = Vector2Subtract(Particle2->pos, Particle1->pos);
     float SquareSum = Vector2DotProduct(delta, delta);
     float DCollision = sqrt(SquareSum);
@@ -101,63 +110,54 @@ void ParticleCollision(particle *Particle1, particle *Particle2)
     }
 }
 
-// sort by x axis 
-int xAxisSort(const void *p1, const void *p2)
-{
-    const particle *p11 = *(const particle **)p1;
-    const particle *p22 = *(const particle **)p2;
-
-    return p11->pos.x > p22->pos.x ? 1 : -1;
-}
-
-void SortParticles(particle **Particles, int NParticles)
-{
-    qsort(Particles, NParticles, sizeof(particle *), xAxisSort);
-}
-
-void AllParticlesCollision(particle **Particles, int NParticles)
-{
-    SortParticles(Particles, NParticles);
-
-    for(int i = 0; i < NParticles - 1; i++)
-    {
-        for(int j = i + 1; j < NParticles; j++)
-        {
-            if((Particles[j]->pos.x - r0) < (Particles[i]->pos.x + r0))
-            {
-                ParticleCollision(Particles[i], Particles[j]);
-            }
-        }
-    }
-}
-
 // change velocity when wall wall collision happens
 void WallCollision(particle *Particle, Vector2 BoxSize)
 {
-    // left wall
-    if(Particle->pos.x < (r0 + epsilon)) 
-    { 
+    float time = 1. / GetFPS();
+    if(Particle->pos.x - r0 + Particle->v.x * time < epsilon)
+    {
         Particle->pos.x = r0; 
         Particle->v.x *= -1.; 
-    } 
-    // right wall
-    else if(Particle->pos.x > (BoxSize.x - r0 - epsilon))
-    { 
+    }
+    else if(Particle->pos.x + r0 + Particle->v.x * time > BoxSize.x - epsilon)
+    {
         Particle->pos.x = BoxSize.x - r0; 
         Particle->v.x *= -1.; 
-    } 
-    // upper wall
-    if(Particle->pos.y < (r0 + epsilon)) 
-    { 
+    }
+    else if(Particle->pos.y - r0 + Particle->v.y * time < epsilon)
+    {
         Particle->pos.y = r0; 
         Particle->v.y *= -1.; 
     }
-    // lower wall
-    else if(Particle->pos.y > (BoxSize.y - r0 - epsilon)) 
-    { 
+    else if(Particle->pos.y + r0 + Particle->v.y * time > BoxSize.y - epsilon)
+    {
         Particle->pos.y = BoxSize.y - r0; 
         Particle->v.y *= -1.; 
-    } 
+    }
+    // // left wall
+    // if(Particle->pos.x < (r0 + epsilon)) 
+    // { 
+    //     Particle->pos.x = r0; 
+    //     Particle->v.x *= -1.; 
+    // } 
+    // // right wall
+    // else if(Particle->pos.x > (BoxSize.x - r0 - epsilon))
+    // { 
+    //     Particle->pos.x = BoxSize.x - r0; 
+    //     Particle->v.x *= -1.; 
+    // } 
+    // // upper wall
+    // if(Particle->pos.y < (r0 + epsilon)) 
+    // { 
+    //     Particle->pos.y = r0; 
+    //     Particle->v.y *= -1.; 
+    // }
+    // // lower wall
+    // else if(Particle->pos.y > (BoxSize.y - r0 - epsilon)) 
+    // { 
+    //     Particle->pos.y = BoxSize.y - r0; 
+    //     Particle->v.y *= -1.; 
+    // } 
 }
 
 // change coordinates according to the formula dx = v_x * dt
@@ -172,13 +172,13 @@ void DrawParticles(particle **Particles, int NParticles, Vector2 BoxSize)
     for(int i = 0; i < NParticles; i++)
     {
         particle *Particle = Particles[i];
-        // AllParticlesCollision(Particles, NParticles);
+        // Paritcles collision:
         for(int j = i + 1; j < NParticles; j++)
         {
-            ParticleCollision(Particles[i], Particles[j]);
+            TwoParticlesCollision(Particles[i], Particles[j]);
         }
-        ChangePosition(Particle, GetFrameTime());
         WallCollision(Particle, BoxSize);
+        ChangePosition(Particle, GetFrameTime());
         DrawCircle((int)(Particle->pos.x), (int)(Particle->pos.y), r0, BLUE);
     }
 }
