@@ -72,6 +72,9 @@ void Plot(particle **Particles, int NParticles, Vector2 BoxSize, float *zoomCoef
     mgl_set_light(gr,1); 
     mgl_axis(gr,"xy","","");        // draw axis
     mgl_bars_xy(gr, dat2, dat1, "", "");
+    char fitFunc[200] = {};
+    sprintf(fitFunc, "(-1 / (%f * %f)) * x + %f", startVelocity / 3, startVelocity / 3, log(NParticles * deltaV / (startVelocity * startVelocity / 9)));
+    mgl_fplot(gr, fitFunc, "", "");
     mgl_get_rgb(gr);
     Image plot = {(void *) mgl_get_rgb(gr), PlotWidth, (int)BoxSize.y, 1,PIXELFORMAT_UNCOMPRESSED_R8G8B8};
     Texture2D plt_texture = LoadTextureFromImage(plot);
@@ -102,7 +105,7 @@ void Plot(particle **Particles, int NParticles, Vector2 BoxSize, float *zoomCoef
     for(int i = 0; i < *Partition; i++)
     {
         Ns2[i] /= NParticles;
-        printf("%d %f\n", i, Ns2[i]);
+        // printf("%d %f\n", i, Ns2[i]);
         mgl_data_set_value(data1, Ns2[i], i, 0, 0);
         mgl_data_set_value(data2, xs[i], i, 0, 0);
     }

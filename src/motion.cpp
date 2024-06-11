@@ -84,16 +84,20 @@ particle **CreateParticles(int NParticles, Vector2 BoxSize)
 // change of velocity and coordinates when two particles collide
 void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 {
-    if(Particle1->pos.x + r0 < Particle2->pos.x - r0 - epsilon || Particle1->pos.x - r0 > Particle2->pos.x + r0 + epsilon)
+    float time = GetFrameTime();
+    Vector2 pos1 = Vector2Add(Particle1->pos, Vector2Scale(Particle1->v, time));
+    Vector2 pos2 = Vector2Add(Particle2->pos, Vector2Scale(Particle2->v, time));
+
+    if(pos1.x + r0 < pos2.x - r0 || pos1.x - r0 > pos2.x + r0)
     {
         return;
     }
-    if(Particle1->pos.y + r0 < Particle2->pos.y - r0 - epsilon || Particle1->pos.y - r0 > Particle2->pos.y + r0 + epsilon)
+    if(pos1.y + r0 < pos2.y - r0 || pos1.y - r0 > pos2.y + r0)
     {
         return ;
     }
 
-    Vector2 delta = Vector2Subtract(Particle2->pos, Particle1->pos);
+    Vector2 delta = Vector2Subtract(pos1, pos2);
     float SquareSum = Vector2DotProduct(delta, delta);
     float DCollision = sqrt(SquareSum);
     if(SquareSum <= 4 * r0 * r0)
@@ -113,51 +117,31 @@ void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 // change velocity when wall wall collision happens
 void WallCollision(particle *Particle, Vector2 BoxSize)
 {
+    // left wall
     float time = 1. / GetFPS();
     if(Particle->pos.x - r0 + Particle->v.x * time < epsilon)
     {
         Particle->pos.x = r0; 
         Particle->v.x *= -1.; 
     }
+    // right wall
     else if(Particle->pos.x + r0 + Particle->v.x * time > BoxSize.x - epsilon)
     {
         Particle->pos.x = BoxSize.x - r0; 
         Particle->v.x *= -1.; 
     }
+    // upper wall
     else if(Particle->pos.y - r0 + Particle->v.y * time < epsilon)
     {
         Particle->pos.y = r0; 
         Particle->v.y *= -1.; 
     }
+    // lower wall
     else if(Particle->pos.y + r0 + Particle->v.y * time > BoxSize.y - epsilon)
     {
         Particle->pos.y = BoxSize.y - r0; 
         Particle->v.y *= -1.; 
     }
-    // // left wall
-    // if(Particle->pos.x < (r0 + epsilon)) 
-    // { 
-    //     Particle->pos.x = r0; 
-    //     Particle->v.x *= -1.; 
-    // } 
-    // // right wall
-    // else if(Particle->pos.x > (BoxSize.x - r0 - epsilon))
-    // { 
-    //     Particle->pos.x = BoxSize.x - r0; 
-    //     Particle->v.x *= -1.; 
-    // } 
-    // // upper wall
-    // if(Particle->pos.y < (r0 + epsilon)) 
-    // { 
-    //     Particle->pos.y = r0; 
-    //     Particle->v.y *= -1.; 
-    // }
-    // // lower wall
-    // else if(Particle->pos.y > (BoxSize.y - r0 - epsilon)) 
-    // { 
-    //     Particle->pos.y = BoxSize.y - r0; 
-    //     Particle->v.y *= -1.; 
-    // } 
 }
 
 // change coordinates according to the formula dx = v_x * dt
