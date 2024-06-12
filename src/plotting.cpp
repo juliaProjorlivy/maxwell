@@ -1,5 +1,8 @@
+#include "abstract.h"
 #include "base_cf.h"
 #include "canvas_cf.h"
+#include "data_cf.h"
+#include "fit.h"
 #include "qt.h"
 #include "mgl_cf.h"
 #include "raylib.h"
@@ -19,7 +22,12 @@
 // E - INCREASE THE AMOUNT OF VELOCITY SECTOR DIVISION
 // C - DECREASE THE AMOUNT OF VELOCITY SECTOR DIVISION
 
-int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, int NParticles, Vector2 BoxSize)
+double LinearFunc(float x, double a, double b)
+{
+    return a * x + b;
+}
+
+int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, double *error, int NParticles, Vector2 BoxSize)
 {
     if(IsKeyPressed(KEY_F))
     {
@@ -65,7 +73,8 @@ int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, int NParticles
 
     for(int i = 0; i < NParticles; i++)
     {
-        int index = (int)(Vector2DotProduct(Particles[i]->v, Particles[i]->v) / deltaV);
+        float v2 = Vector2DotProduct(Particles[i]->v, Particles[i]->v);
+        int index = (int)(v2 / deltaV);
         y[index]++;
     }
 
@@ -81,23 +90,35 @@ int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, int NParticles
     }
 
     // setting the plot
-    mgl_set_ranges(gr, 0, NParticles * startVelocityIn2 * zoomCoef->x, 0, log(NParticles) * zoomCoef->y, 0, 0);
+    mgl_set_ranges(gr, 0, NParticles * startVelocityIn2 * 0.02 * zoomCoef->x, 0, log(NParticles) * zoomCoef->y, 0, 0);
     mgl_label(gr, 'x', "v^2", 0, "");
     mgl_label(gr, 'y', "N", 0, "");
     mgl_set_light(gr, 1);
     mgl_axis(gr,"xy","","");
     mgl_bars_xy(gr, dat2, dat1, "", "");
+    // mgl_plot_xy(gr, dat2, dat1, "g", "");
 
     // linear graph
+    double a = -alpha;
+    double b = log(NParticles * deltaV * alpha);
     char fitFunc[100] = {};
-    sprintf(fitFunc, "(-1 * %f * x + %f", alpha, log(NParticles * deltaV * alpha));
-    mgl_fplot(gr, fitFunc, "", "");
+    sprintf(fitFunc, "(%fl * x + %fl", a, b);
+    mgl_fplot(gr, fitFunc, "r-", "");
 
     // draw in memory and then draw in window
     mgl_get_rgb(gr);
     Image plot = {(void *) mgl_get_rgb(gr), PlotWidth, (int)BoxSize.y, 1,PIXELFORMAT_UNCOMPRESSED_R8G8B8};
     Texture2D plt_texture = LoadTextureFromImage(plot);
     DrawTexture(plt_texture, BoxSize.x, 0, WHITE);
+
+
+    for(int i = 0; i < *Partition && y[i] > 0; i++)
+    {
+        double yi = log(y[i]);
+        double yi_fit = LinearFunc(x[i], a, b);
+        *error += (yi - yi_fit) * (yi - yi_fit);
+    }
+    *error = sqrt(*error / (NParticles * (NParticles - 1)));
 
     // clean
     mgl_delete_data(dat1);

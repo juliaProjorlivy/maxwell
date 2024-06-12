@@ -26,7 +26,7 @@ particle *CreateParticle(Vector2 Pos)
 // Create an array of evenly spreaded particles
 particle **CreateParticles(int NParticles, Vector2 BoxSize, float radius, float v0)
 {
-    float time = 1. / 10;
+    float time = 1. / 30; // 30 starting fps
     radius += time * v0;
 
     if((int)(BoxSize.y / (2 * radius)) * (int)(BoxSize.x / (2 * radius)) < NParticles)
