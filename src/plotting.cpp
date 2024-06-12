@@ -9,25 +9,25 @@
 #include "particles.h"
 #include "verror.h"
 
-#include "plotting.h"
-
 // KEY MAPPING
 // SPACE - STOP
 // CTRL+D - QUIT
-// F - ZOOM ON THE GRAPH 
-// S - ZOOM OUT OF THE GRAPH 
+// F - ZOOM ON THE GRAPH BY OY 
+// S - ZOOM OUT OF THE GRAPH BY OY
+// G - ZOOM ON THE GRAPH BY OX
+// A - ZOOM OUT OF THE GRAPH BY OX
 // E - INCREASE THE AMOUNT OF VELOCITY SECTOR DIVISION
 // C - DECREASE THE AMOUNT OF VELOCITY SECTOR DIVISION
 
-void Plot(particle **Particles, int NParticles, Vector2 BoxSize, float *zoomCoef, int *Partition, float epsV)
+int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, int NParticles, Vector2 BoxSize)
 {
-    if(IsKeyPressed(KEY_F) && *zoomCoef > 0)
+    if(IsKeyPressed(KEY_F))
     {
-        *zoomCoef -= 0.1;
+        zoomCoef->y /= 1.5;
     }
-    if(IsKeyPressed(KEY_S) && *zoomCoef < 1)
+    if(IsKeyPressed(KEY_S) && zoomCoef->y < 1)
     {
-        *zoomCoef += 0.1;
+        zoomCoef->y *= 1.5;
     }
     if(IsKeyPressed(KEY_E) && *Partition < INT_MAX / 2)
     {
@@ -37,100 +37,76 @@ void Plot(particle **Particles, int NParticles, Vector2 BoxSize, float *zoomCoef
     {
         *Partition >>= 1;
     }
+    if(IsKeyPressed(KEY_G))
+    {
+        zoomCoef->x /= 1.5;
+    }
+    if(IsKeyPressed(KEY_A) && zoomCoef->x < 1)
+    {
+        zoomCoef->x *= 1.5;
+    }
 
-    float deltaV = NParticles * startVelocity * startVelocity / *Partition + epsV;
-    int *Ns = (int *)calloc(sizeof(int), *Partition);
-    float *xs = (float *)calloc(sizeof(float), *Partition);
+    float startVelocityIn2 = startVelocity * startVelocity;
+    float alpha = 1.5 / startVelocityIn2;
+    float deltaV = NParticles * startVelocityIn2 / *Partition;
+
+    int *y = (int *)calloc(sizeof(int), *Partition);                // number of particles with the v^2 in range [v, v + deltaV]
+    float *x = (float *)calloc(sizeof(float), *Partition);          // v^2
+    if(!x | !y)
+    {
+        VERROR_MEM;
+        return 1;
+    }
 
     for(int i = 0; i < *Partition; i++)
     {
-        xs[i] = (i + 1) * deltaV;
+        x[i] = i * deltaV;
     }
 
     for(int i = 0; i < NParticles; i++)
     {
         int index = (int)(Vector2DotProduct(Particles[i]->v, Particles[i]->v) / deltaV);
-        Ns[index]++;
+        y[index]++;
     }
 
     HMGL gr = mgl_create_graph(PlotWidth, BoxSize.y);
 
+    // filling the data
     HMDT dat1 = mgl_create_data_size(*Partition, 0, 0);
     HMDT dat2 = mgl_create_data_size(*Partition, 0, 0);
     for(int i = 0; i < *Partition; i++)
     {
-        mgl_data_set_value(dat1, Ns[i], i, 0, 0);
-        mgl_data_set_value(dat2, xs[i], i, 0, 0);
+        mgl_data_set_value(dat1, log(y[i]), i, 0, 0);
+        mgl_data_set_value(dat2, x[i], i, 0, 0);
     }
 
-
-    
-
-    mgl_set_ranges(gr, 0, N0 * startVelocity * startVelocity * 0.1, 0, N0 * *zoomCoef, 0, 0);      // ranges of coordinates
+    // setting the plot
+    mgl_set_ranges(gr, 0, NParticles * startVelocityIn2 * zoomCoef->x, 0, log(NParticles) * zoomCoef->y, 0, 0);
     mgl_label(gr, 'x', "v^2", 0, "");
     mgl_label(gr, 'y', "N", 0, "");
-    mgl_set_light(gr,1); 
-    mgl_axis(gr,"xy","","");        // draw axis
+    mgl_set_light(gr, 1);
+    mgl_axis(gr,"xy","","");
     mgl_bars_xy(gr, dat2, dat1, "", "");
-    char fitFunc[200] = {};
-    sprintf(fitFunc, "(-1 / (%f * %f)) * x + %f", startVelocity / 3, startVelocity / 3, log(NParticles * deltaV / (startVelocity * startVelocity / 9)));
+
+    // linear graph
+    char fitFunc[100] = {};
+    sprintf(fitFunc, "(-1 * %f * x + %f", alpha, log(NParticles * deltaV * alpha));
     mgl_fplot(gr, fitFunc, "", "");
+
+    // draw in memory and then draw in window
     mgl_get_rgb(gr);
     Image plot = {(void *) mgl_get_rgb(gr), PlotWidth, (int)BoxSize.y, 1,PIXELFORMAT_UNCOMPRESSED_R8G8B8};
     Texture2D plt_texture = LoadTextureFromImage(plot);
     DrawTexture(plt_texture, BoxSize.x, 0, WHITE);
-    mgl_delete_data(dat1);          // free used memory
-    mgl_delete_data(dat2);          // free used memory
+
+    // clean
+    mgl_delete_data(dat1);
+    mgl_delete_data(dat2);
     mgl_delete_graph(gr);
+    free(y);
+    free(x);
 
-        
-
-    float *Ns2 = (float *)calloc(sizeof(float), *Partition);
-    deltaV = sqrt(NParticles * startVelocity * startVelocity) / *Partition;
-    for(int i = 0; i < *Partition; i++)
-    {
-        xs[i] = (i + 1) * deltaV;
-    }
-
-    for(int i = 0; i < NParticles; i++)
-    {
-        int index = (int)(sqrt(Vector2DotProduct(Particles[i]->v, Particles[i]->v)) / deltaV);
-        Ns2[index]++;
-    }
-
-    HMGL plt = mgl_create_graph(BoxSize.x + PlotWidth, plotHeight);
-
-    HMDT data1 = mgl_create_data_size(*Partition, 0, 0);
-    HMDT data2 = mgl_create_data_size(*Partition, 0, 0);
-    for(int i = 0; i < *Partition; i++)
-    {
-        Ns2[i] /= NParticles;
-        // printf("%d %f\n", i, Ns2[i]);
-        mgl_data_set_value(data1, Ns2[i], i, 0, 0);
-        mgl_data_set_value(data2, xs[i], i, 0, 0);
-    }
-
-
-    mgl_set_ranges(plt, 0, startVelocity * sqrt(N0) * 0.7, 0, 1.1 / startVelocity, 1, 1);      // ranges of coordinates
-    mgl_label(plt, 'x', "v", 0, "");
-    mgl_label(plt, 'y', "F(v)", 0, "");
-    mgl_set_light(plt,1); 
-    mgl_axis(plt,"xy","","");        // draw axis
-    mgl_fplot(plt, "( 3 / ( 500 * 500 ) ) * x * ((2.7182818)^( (-1.5) * (( x / 500 ) ^ 2) ))", "", "");
-    //
-    mgl_bars_xy(plt, data2, data1, "", "");
-    mgl_get_rgb(plt);
-    Image plot_maxwell = {(void *) mgl_get_rgb(plt), (int)BoxSize.x + PlotWidth, plotHeight, 1,PIXELFORMAT_UNCOMPRESSED_R8G8B8};
-    Texture2D plot_maxwell_texture = LoadTextureFromImage(plot_maxwell);
-    DrawTexture(plot_maxwell_texture, 0, BoxSize.y, WHITE);
-    mgl_delete_data(data1);          // free used memory
-    mgl_delete_data(data2);          // free used memory
-    mgl_delete_graph(plt);
-
-    free(Ns);
-    free(Ns2);
-    free(xs);
-
+    return 0;
 }
 
 

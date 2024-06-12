@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <stdlib.h>
 
 #include "raylib.h"
@@ -23,8 +24,17 @@ particle *CreateParticle(Vector2 Pos)
 }
 
 // Create an array of evenly spreaded particles
-particle **CreateParticles(int NParticles, Vector2 BoxSize)
+particle **CreateParticles(int NParticles, Vector2 BoxSize, float radius, float v0)
 {
+    float time = 1. / 10;
+    radius += time * v0;
+
+    if((int)(BoxSize.y / (2 * radius)) * (int)(BoxSize.x / (2 * radius)) < NParticles)
+    {
+        VERROR("Size error too many particles");
+        return NULL;
+    }
+
     particle **Particles = (particle **)calloc(sizeof(particle *), NParticles);
     if(!Particles)
     {
@@ -32,8 +42,8 @@ particle **CreateParticles(int NParticles, Vector2 BoxSize)
         return NULL;
     }
 
-    int Nw = (int)(BoxSize.x / (2 * r0));
-    int Nh = (int)(BoxSize.y / (2 * r0));
+    int Nw = (int)(BoxSize.x / (2 * radius));
+    int Nh = (int)(BoxSize.y / (2 * radius));
 
     int Ncolumns = 1, Nstrings = 1;
     float ax = 1, ay = 1;
@@ -84,7 +94,7 @@ particle **CreateParticles(int NParticles, Vector2 BoxSize)
 // change of velocity and coordinates when two particles collide
 void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 {
-    float time = GetFrameTime();
+    float time = 1. / GetFPS();
     Vector2 pos1 = Vector2Add(Particle1->pos, Vector2Scale(Particle1->v, time));
     Vector2 pos2 = Vector2Add(Particle2->pos, Vector2Scale(Particle2->v, time));
 
