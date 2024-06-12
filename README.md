@@ -8,7 +8,12 @@ number of particles, Distribution density).
 ## Theory
 
 Here some theoretical information:
-![Alt textttt](./maxwell1.jpg)
-![Alt textttt](./maxwell2.jpg)
-![Alt textttt](./maxwell3.jpg)
+![Maxwell Distribution](image/maxwell1.jpg)
+![Maxwell Distribution](image/maxwell2.jpg)
+![Balls collision](image/maxwell3.jpg)
+
+## Installation
+#### Requirements
+Some libraries: [mathGL](https://mathgl.sourceforge.net/doc_en/Main.html), [raylib](https://www.raylib.com/index.html), my own error managing lib that is already
+in code as a submodule (you can make it static or dynamic).
 
