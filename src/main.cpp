@@ -43,6 +43,7 @@ int main()
             VERROR("something went wrong");
             return 1;
         }
+
         EndDrawing();
     }
 
