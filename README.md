@@ -4,7 +4,7 @@ Starting to move at the same speed in a random directions, the particles
 should come to a Maxwell velocity Distribution after some time. 
 So the aim is to calculate that time, considering starting conditions (velocity, 
 number of particles, Distribution density).
-[example](output.gif)
+![](output.gif)
 
 ## Theory
 
