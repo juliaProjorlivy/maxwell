@@ -94,7 +94,8 @@ particle **CreateParticles(int NParticles, Vector2 BoxSize, float radius, float 
 // change of velocity and coordinates when two particles collide
 void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 {
-    float time = 1. / GetFPS();
+    
+    float time = GetFrameTime();
     Vector2 pos1 = Vector2Add(Particle1->pos, Vector2Scale(Particle1->v, time));
     Vector2 pos2 = Vector2Add(Particle2->pos, Vector2Scale(Particle2->v, time));
 
@@ -104,10 +105,10 @@ void TwoParticlesCollision(particle *Particle1, particle *Particle2)
     }
     if(pos1.y + r0 < pos2.y - r0 || pos1.y - r0 > pos2.y + r0)
     {
-        return ;
+        return;
     }
 
-    Vector2 delta = Vector2Subtract(pos1, pos2);
+    Vector2 delta = Vector2Subtract(pos2, pos1);
     float SquareSum = Vector2DotProduct(delta, delta);
     float DCollision = sqrt(SquareSum);
     if(SquareSum <= 4 * r0 * r0)
@@ -128,30 +129,29 @@ void TwoParticlesCollision(particle *Particle1, particle *Particle2)
 void WallCollision(particle *Particle, Vector2 BoxSize)
 {
     // left wall
-    float time = 1. / GetFPS();
-    if(Particle->pos.x - r0 + Particle->v.x * time < epsilon)
-    {
+    if(Particle->pos.x < (r0 + epsilon)) 
+    { 
         Particle->pos.x = r0; 
         Particle->v.x *= -1.; 
-    }
+    } 
     // right wall
-    else if(Particle->pos.x + r0 + Particle->v.x * time > BoxSize.x - epsilon)
-    {
+    else if(Particle->pos.x > (BoxSize.x - r0 - epsilon))
+    { 
         Particle->pos.x = BoxSize.x - r0; 
         Particle->v.x *= -1.; 
-    }
+    } 
     // upper wall
-    else if(Particle->pos.y - r0 + Particle->v.y * time < epsilon)
-    {
+    if(Particle->pos.y < (r0 + epsilon)) 
+    { 
         Particle->pos.y = r0; 
         Particle->v.y *= -1.; 
     }
     // lower wall
-    else if(Particle->pos.y + r0 + Particle->v.y * time > BoxSize.y - epsilon)
-    {
+    else if(Particle->pos.y > (BoxSize.y - r0 - epsilon)) 
+    { 
         Particle->pos.y = BoxSize.y - r0; 
         Particle->v.y *= -1.; 
-    }
+    } 
 }
 
 // change coordinates according to the formula dx = v_x * dt
@@ -171,9 +171,9 @@ void DrawParticles(particle **Particles, int NParticles, Vector2 BoxSize)
         {
             TwoParticlesCollision(Particles[i], Particles[j]);
         }
+        DrawCircle((int)(Particle->pos.x), (int)(Particle->pos.y), r0, BLUE);
         WallCollision(Particle, BoxSize);
         ChangePosition(Particle, GetFrameTime());
-        DrawCircle((int)(Particle->pos.x), (int)(Particle->pos.y), r0, BLUE);
     }
 }
 

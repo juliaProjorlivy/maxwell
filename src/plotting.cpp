@@ -109,7 +109,3 @@ int Plot(particle **Particles, Vector2 *zoomCoef, int *Partition, int NParticles
     return 0;
 }
 
-
-
-
-
