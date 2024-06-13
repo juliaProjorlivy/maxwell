@@ -17,6 +17,12 @@ Here some theoretical information:
 Apparently particles come to Maxwell Distribution somehow quickly.
 So we can set fault and continue measuring time till calculated fault is less than the set one.
 
+## Some results
+While calculating the time I noticed that mean square error of the square of velocity somehow depends on the starting conditions like N - number of particles and 
+v_0 - starting velocity. After collecting and researching some data (all calculations is in the ErrorDependency.ipynb file) I came to conclusion that this error does not depend on the speed but rather on number of particles. Here some plots that confirm my results.
+![ErrorDependency](./image/ErrorVelocity.png)
+![ErrorDependency](./image/linear.png)
+
 ## Installation
 #### Requirements
 Some libraries: [mathGL](https://mathgl.sourceforge.net/doc_en/Main.html), [raylib](https://www.raylib.com/index.html), my own error managing lib that is already

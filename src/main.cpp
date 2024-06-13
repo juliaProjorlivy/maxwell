@@ -5,6 +5,38 @@
 #include "verror.h"
 #include "particles.h"
 
+// int InputHandle(int argc, char *argv[], float *n, float *v)
+// {
+//     switch (argc) 
+//     {
+//         case 1:
+//             {
+//                 return 0;
+//             }
+//         case 2:
+//             {
+//                 if(strlen(argv[1]) != 2)
+//                 {
+//                     VERROR("incorrect flag");
+//                     return 1;
+//                 }
+//                 if(*argv[1] == '-' && *(argv[1] + 1) == 'p')
+//                 {
+//                     printf("enter dencity and velocity:\n");
+//                     scanf("%f %f", n, v);
+//                     return 0;
+//                 }
+//                 return 1;
+//             }
+//         default:
+//             {
+//                 VERROR("incorrect arguments\n//nothing - default param; -p set param//");
+//                 return 0;
+//             }
+//
+//     }
+// }
+
 int main()
 {
     InitWindow(BoxWidth + PlotWidth, BoxHeight, "Maxwell");
@@ -19,12 +51,15 @@ int main()
     }
 
     int Nframes = 0;
+    int NFcalculate = 0;
     int shouldStopProgram = 0;
     double error = 0;
     int rangeNumber = Partitions;
     Vector2 zoomCoef = {1., 1.};
-    int shouldStopDrawing = 0;                 // stop drawing checkup
-    while(!WindowShouldClose() && !shouldStopProgram)
+    int shouldStopDrawing = 0; // stop drawing checkup
+    double sum = 0;
+    int stop2 = 0;
+    while(!WindowShouldClose() && !stop2)
     {
         if(IsKeyPressed(KEY_SPACE))
         {
@@ -42,22 +77,34 @@ int main()
         }
 
         error = 0;
-        if(Plot(Particles, &zoomCoef, &rangeNumber, &error))
+        int ret_val = Plot(Particles, &zoomCoef, &rangeNumber, &error);
+        if(ret_val == ERROR)
         {
             VERROR("something went wrong");
             return 1;
         }
 
-        if(error < defaultError && Nframes > 2)
+        if(ret_val == STOP_PROG)
         {
-            printf("SquareMeanFault = %lf | relevant fault = %lf\ntime = %f\n", error, defaultError, GetTime());
-            shouldStopProgram = 1;
+            Nframes++;
+            shouldStopProgram = Nframes > 20 ? 1 : 0;
+        }
+        else {
+            Nframes = 0;
+        }
+        if(shouldStopProgram)
+        {
+            sum += error;
+            NFcalculate++;
         }
 
-        Nframes++;
+        stop2 = NFcalculate > 1000 ? 1 : 0;
+
         EndDrawing();
     }
 
+    printf("fault = %lf\n", sum / NFcalculate);
+    // printf("SquareMeanFault = %lf | relevant fault = %lf\ntime = %f\n", error, defaultError, GetTime());
     CloseWindow();
     DeleteParticles(Particles);
     return 0;
