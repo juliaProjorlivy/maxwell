@@ -59,7 +59,7 @@ int main()
     int shouldStopDrawing = 0; // stop drawing checkup
     double sum = 0;
     int stop2 = 0;
-    while(!WindowShouldClose() && !stop2)
+    while(!WindowShouldClose() && !shouldStopProgram)
     {
         if(IsKeyPressed(KEY_SPACE))
         {
@@ -84,27 +84,28 @@ int main()
             return 1;
         }
 
+        sum += error;
+        Nframes++;
         if(ret_val == STOP_PROG)
         {
             Nframes++;
-            shouldStopProgram = Nframes > 20 ? 1 : 0;
+            shouldStopProgram = Nframes > 50 ? 1 : 0;
         }
         else {
             Nframes = 0;
         }
-        if(shouldStopProgram)
-        {
-            sum += error;
-            NFcalculate++;
-        }
+        // if(sum / Nframes < defaultError && Nframes > 20)
+        // {
+        //     shouldStopProgram = 1;
+        // }
 
-        stop2 = NFcalculate > 1000 ? 1 : 0;
+        // stop2 = NFcalculate > 1000 ? 1 : 0;
 
         EndDrawing();
     }
 
-    printf("fault = %lf\n", sum / NFcalculate);
-    // printf("SquareMeanFault = %lf | relevant fault = %lf\ntime = %f\n", error, defaultError, GetTime());
+    // printf("fault = %lf\n", sum / NFcalculate);
+    printf("SquareMeanFault = %lf | relevant fault = %lf\ntime = %f\n", error, defaultError, GetTime());
     CloseWindow();
     DeleteParticles(Particles);
     return 0;

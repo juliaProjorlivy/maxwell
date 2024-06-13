@@ -4,13 +4,13 @@
 #include "raylib.h"
 
 static const float epsilon = 1e-1;          // error to prevent collision overlap beforehand
-static const float startVelocity = 500.;    // starting Velocity for all particles
+static const float startVelocity = 50.;    // starting Velocity for all particles
 
 static const int N0 = 400;                  // number of particles
 static const int r0 = 10;                   // radius of particles
 static const int BoxHeight = 500;           // box height
 static const int BoxWidth = 810;            // box width
-static const double defaultError = 0.4;  // stop condition
+static const double defaultError = 0.024;  // stop condition
 
 typedef struct
 {

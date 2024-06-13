@@ -23,6 +23,11 @@ v_0 - starting velocity. After collecting and researching some data (all calcula
 ![ErrorDependency](./image/ErrorVelocity.png)
 ![ErrorDependency](./image/linear.png)
 
+Now as we know that error does not depend on velocity lets measure time during which particles come to maxwell Distribution as following. Take particular number of particles and depending on velocity measure time when for a long time error is less then average error for the number of particles.
+
+As a result calculated time is always different even for the same velocity. So there is seem to be no correlation between time and speed.
+![time](./image/time.png)
+
 ## Installation
 #### Requirements
 Some libraries: [mathGL](https://mathgl.sourceforge.net/doc_en/Main.html), [raylib](https://www.raylib.com/index.html), my own error managing lib that is already
