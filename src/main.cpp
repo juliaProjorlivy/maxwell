@@ -1,112 +1,47 @@
-#include <stdio.h>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/VideoMode.hpp>
+#include <SFML/Window/WindowStyle.hpp>
+#include "particles.hpp"
 
-#include "raylib.h"
-
-#include "verror.h"
-#include "particles.h"
-
-// int InputHandle(int argc, char *argv[], float *n, float *v)
-// {
-//     switch (argc) 
-//     {
-//         case 1:
-//             {
-//                 return 0;
-//             }
-//         case 2:
-//             {
-//                 if(strlen(argv[1]) != 2)
-//                 {
-//                     VERROR("incorrect flag");
-//                     return 1;
-//                 }
-//                 if(*argv[1] == '-' && *(argv[1] + 1) == 'p')
-//                 {
-//                     printf("enter dencity and velocity:\n");
-//                     scanf("%f %f", n, v);
-//                     return 0;
-//                 }
-//                 return 1;
-//             }
-//         default:
-//             {
-//                 VERROR("incorrect arguments\n//nothing - default param; -p set param//");
-//                 return 0;
-//             }
-//
-//     }
-// }
+static const unsigned int BoxWidth = 800;
+static const unsigned int BoxHeight = 600;
+static const unsigned int N0 = 3;
 
 int main()
 {
-    InitWindow(BoxWidth + PlotWidth, BoxHeight, "Maxwell");
+    sf::RenderWindow balls_window {sf::VideoMode(BoxWidth, BoxHeight), "Maxwell distribution", sf::Style::Default};
 
-    Vector2 BoxSize = {.x = BoxWidth, .y = BoxHeight};
+    sf::Vector2<unsigned int> BoxSize = {BoxWidth, BoxHeight};
+    Ball **balls = CreateBalls(N0, {BoxWidth, BoxHeight}, default_radius);
 
-    particle **Particles = CreateParticles();
-    if(!Particles)
+    //game loop
+    while(balls_window.isOpen())
     {
-        VERROR("something went wrong");
-        return 1;
+        sf::Event event;
+        sf::Clock clock;
+        while(balls_window.pollEvent(event))
+        {
+            if(event.type == sf::Event::Closed | event.type == sf::Event::KeyPressed)
+            {
+                balls_window.close();
+            }
+        }
+
+        balls_window.clear(sf::Color::Black);
+
+        sf::Time time = clock.getElapsedTime();
+        RenderBalls(balls, balls_window, N0, time.asSeconds(), BoxSize);
+
+        balls_window.display();
+        clock.restart();
+
     }
 
-    int Nframes = 0;
-    int NFcalculate = 0;
-    int shouldStopProgram = 0;
-    double error = 0;
-    int rangeNumber = Partitions;
-    Vector2 zoomCoef = {1., 1.};
-    int shouldStopDrawing = 0; // stop drawing checkup
-    double sum = 0;
-    int stop2 = 0;
-    while(!WindowShouldClose() && !shouldStopProgram)
-    {
-        if(IsKeyPressed(KEY_SPACE))
-        {
-            shouldStopDrawing = shouldStopDrawing ? 0 : 1;
-            printf("is pressed\n");
-        }
+    DeleteBalls(balls, N0);
 
-        BeginDrawing();
-        if(!shouldStopDrawing)
-        {
-            ClearBackground(WHITE);
-            DrawLineBezier({BoxSize.x, 0}, {BoxSize.x, BoxSize.y}, 1, BLACK);
-            DrawLineBezier({0, BoxSize.y}, {BoxSize.x, BoxSize.y}, 1, BLACK);
-            DrawParticles(Particles);
-        }
-
-        error = 0;
-        int ret_val = Plot(Particles, &zoomCoef, &rangeNumber, &error);
-        if(ret_val == ERROR)
-        {
-            VERROR("something went wrong");
-            return 1;
-        }
-
-        sum += error;
-        Nframes++;
-        if(ret_val == STOP_PROG)
-        {
-            Nframes++;
-            shouldStopProgram = Nframes > 50 ? 1 : 0;
-        }
-        else {
-            Nframes = 0;
-        }
-        // if(sum / Nframes < defaultError && Nframes > 20)
-        // {
-        //     shouldStopProgram = 1;
-        // }
-
-        // stop2 = NFcalculate > 1000 ? 1 : 0;
-
-        EndDrawing();
-    }
-
-    // printf("fault = %lf\n", sum / NFcalculate);
-    printf("SquareMeanFault = %lf | relevant fault = %lf\ntime = %f\n", error, defaultError, GetTime());
-    CloseWindow();
-    DeleteParticles(Particles);
     return 0;
 }

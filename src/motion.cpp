@@ -139,7 +139,7 @@ void WallCollision(particle *Particle, Vector2 BoxSize)
     { 
         Particle->pos.x = BoxSize.x - r0; 
         Particle->v.x *= -1.; 
-    } 
+    }
     // upper wall
     if(Particle->pos.y < (r0 + epsilon)) 
     { 
