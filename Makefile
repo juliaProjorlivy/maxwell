@@ -1,6 +1,6 @@
 CXX = g++
 
-CXX_FLAGS = -I include -I /home/julia/libs/includeVerror -I /usr/include/SFML -I/usr/include/mgl2 -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop-optimizations 	\
+CXX_FLAGS = -I include -I /home/julia/libs/includeVerror -I /usr/include/SFML -I/usr/include -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Waggressive-loop-optimizations 	\
  -Wc++14-compat -Wmissing-declarations -Wcast-align -Wcast-qual -Wchar-subscripts -Wconditionally-supported  	\
  -Wconversion -Wctor-dtor-privacy -Wempty-body -Wfloat-equal -Wformat-nonliteral -Wformat-security 				\
  -Wformat-signedness -Wformat=2 -Winline -Wlogical-op -Wnon-virtual-dtor -Wopenmp-simd -Woverloaded-virtual 	\
@@ -11,13 +11,13 @@ CXX_FLAGS = -I include -I /home/julia/libs/includeVerror -I /usr/include/SFML -I
  -flto-odr-type-merging -fno-omit-frame-pointer -Wlarger-than=8192 -Wstack-usage=8192 -pie -fPIE -Werror=vla 															\
  -fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 
-SRCS = src/main.cpp src/particles.cpp
+SRCS = src/main.cpp src/particles.cpp src/plot.cpp
 OBJ = $(patsubst %.cpp, build/%.o, $(subst src/, , $(SRCS))) 
 EXECUTABLE = maxwell
 VALGRIND = valgrind --leak-check=full --leak-resolution=med ./$(EXECUTABLE)
 
 GRAPHIC_LIB = -lsfml-graphics -lsfml-window -lsfml-system
-MGL_LIB = -L/usr/lib/ -lmgl -lmgl-qt5
+MGL_LIB = -lmgl -lpthread
 
 all: $(OBJ)
 	@echo "CXX $(EXECUTABLE)"
